@@ -1,6 +1,6 @@
 /* myserver.cc: sample server program */
-#include "connection.h"
-#include "server.h"
+#include "Connection.h"
+#include "Server.h"
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -36,7 +36,7 @@ Server init(int argc, char* argv[])
     }
     int port = -1;
     try {
-        [1]);
+        port = stoi(argv[1]);
     } catch (exception& e) {
         cerr << "Wrong format for port number. " << e.what() << endl;
         exit(2);
