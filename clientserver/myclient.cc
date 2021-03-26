@@ -43,7 +43,7 @@ int MyClient::run()
         while(std::cin >> nbr) {
                 try {
                         mh.sendInt(nbr);
-                        if(nbr == 2) {
+                        if(nbr == 2) { // TODO add input handler
                                 mh.sendStringParameter("First");
                         }
                         mh.sendInt(8);
