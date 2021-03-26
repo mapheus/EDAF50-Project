@@ -10,9 +10,9 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS  = -std=c++11 -I..
+CPPFLAGS  = -std=c++14 -I..
 CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++14
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS   = -g -L..
@@ -30,8 +30,8 @@ all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 # The dependency on libclientserver.a is not defined.
-myserver: myserver.o
-myclient: myclient.o
+myserver: myserver.o messagehandler.o 
+myclient: myclient.o messagehandler.o
 
 SRC = $(wildcard *.cc)
 

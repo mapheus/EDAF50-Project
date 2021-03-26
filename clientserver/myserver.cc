@@ -1,89 +1,135 @@
-/* myserver.cc: sample server program */
-#include "connection.h"
-#include "connectionclosedexception.h"
-#include "server.h"
+#include "myserver.h"
 
-#include <cstdlib>
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include <string>
-
-using namespace std;
-
-/*
- * Read an integer from a client.
- */
-int readNumber(const shared_ptr<Connection>& conn)
+MyServer::MyServer(int argc, char* argv[])
 {
-        unsigned char byte1 = conn->read();
-        unsigned char byte2 = conn->read();
-        unsigned char byte3 = conn->read();
-        unsigned char byte4 = conn->read();
-        return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-}
-
-/*
- * Send a string to a client.
- */
-void writeString(const shared_ptr<Connection>& conn, const string& s)
-{
-        for (char c : s) {
-                conn->write(c);
-        }
-        conn->write('$');
-}
-
-Server init(int argc, char* argv[])
-{
-        if (argc != 2) {
-                cerr << "Usage: myserver port-number" << endl;
+        if (argc != 2) 
+        {
+                std::cerr << "Usage: myserver port-number" << std::endl;
                 exit(1);
         }
 
         int port = -1;
         try {
-                port = stoi(argv[1]);
-        } catch (exception& e) {
-                cerr << "Wrong format for port number. " << e.what() << endl;
+                port = std::stoi(argv[1]);
+        } catch (std::exception& e) {
+                std::cerr << "Wrong format for port number. " << e.what() << std::endl;
                 exit(2);
         }
 
-        Server server(port);
-        if (!server.isReady()) {
-                cerr << "Server initialization error." << endl;
+        server = std::make_unique<Server>(port);
+        if (!server->isReady()) 
+        {
+                std::cerr << "Server initialization error." << std::endl;
                 exit(3);
         }
-        return server;
 }
+
+void MyServer::inputHandler(int choice) 
+{
+        switch(choice) 
+        {
+                case static_cast<int>(Protocol::COM_LIST_NG):
+                {
+                        std::cout << "123" << std::endl;
+                        int end = mh.recvInt();
+                        if(end != 8) {throw new ConnectionClosedException;}
+
+                        mh.sendInt(static_cast<int>(Protocol::ANS_LIST_NG));
+                        mh.sendInt(newsgroups.size());
+                        for(auto& e: newsgroups) {
+                                mh.sendInt(e.getId());
+                                mh.sendStringParameter(e.getTitle());
+                        }
+                        mh.sendInt(static_cast<int>(Protocol::ANS_END));
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_CREATE_NG):
+                {
+                        std::string groupName = mh.recvStringParameter();
+                        int end = mh.recvInt();
+                        if(end != 8) {throw new ConnectionClosedException;}
+
+                        auto it = find_if(newsgroups.begin(), newsgroups.end(), [&groupName](NewsGroup& ng) {
+                                return groupName == ng.getTitle();
+                        });
+                        mh.sendInt(static_cast<int>(Protocol::ANS_CREATE_NG));
+                        if(it == newsgroups.end() && newsgroups.size() != 0) 
+                        {
+                                mh.sendInt(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendInt(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
+                        } else {
+                                mh.sendInt(static_cast<int>(Protocol::ANS_ACK));
+                                newsgroups.emplace_back(groupName);
+                        }
+                        
+                        mh.sendInt(static_cast<int>(Protocol::ANS_END));
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_DELETE_NG):
+                {
+                        
+
+
+                        mh.recvInt();
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_LIST_ART):
+                {
+                        mh.recvInt();
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_CREATE_ART):
+                {
+                        mh.recvInt();
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_DELETE_ART):
+                {
+                        mh.recvInt();
+                        break;
+                }
+                case static_cast<int>(Protocol::COM_GET_ART):
+                {
+                        mh.recvInt();
+                        break;
+                }
+                default:
+                {
+                        throw new ConnectionClosedException;
+                        break;
+                }
+        }
+}
+
+void MyServer::run() {
+        while (true) 
+        {
+                auto conn = server->waitForActivity();
+                mh.changeConnection(conn);
+                if (conn != nullptr) 
+                {
+                        try {
+                                int nbr = mh.recvInt();
+                                inputHandler(nbr);
+
+                                
+                                //writeString(conn, result);
+                        } catch (ConnectionClosedException&) {
+                                server->deregisterConnection(conn);
+                                std::cout << "Client closed connection" << std::endl;
+                        }
+                } else {
+                        conn = std::make_shared<Connection>();
+                        server->registerConnection(conn);
+                        std::cout << "New client connects" << std::endl;
+                }
+        }
+}
+
 
 int main(int argc, char* argv[])
 {
-        auto server = init(argc, argv);
-
-        while (true) {
-                auto conn = server.waitForActivity();
-                if (conn != nullptr) {
-                        try {
-                                int    nbr = readNumber(conn);
-                                string result;
-                                if (nbr > 0) {
-                                        result = "positive";
-                                } else if (nbr == 0) {
-                                        result = "zero";
-                                } else {
-                                        result = "negative";
-                                }
-                                writeString(conn, result);
-                        } catch (ConnectionClosedException&) {
-                                server.deregisterConnection(conn);
-                                cout << "Client closed connection" << endl;
-                        }
-                } else {
-                        conn = make_shared<Connection>();
-                        server.registerConnection(conn);
-                        cout << "New client connects" << endl;
-                }
-        }
+        MyServer server(argc, argv);
+        server.run();
         return 0;
 }

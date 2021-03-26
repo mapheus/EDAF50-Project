@@ -1,87 +1,69 @@
 /* myclient.cc: sample client program */
 #include "connection.h"
 #include "connectionclosedexception.h"
+#include "myclient.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-using namespace std;
-
-/*
- * Send an integer to the server as four bytes.
- */
-void writeNumber(const Connection& conn, int value)
-{
-        conn.write((value >> 24) & 0xFF);
-        conn.write((value >> 16) & 0xFF);
-        conn.write((value >> 8) & 0xFF);
-        conn.write(value & 0xFF);
-}
-
-/*
- * Read a string from the server.
- */
-string readString(const Connection& conn)
-{
-        string s;
-        char   ch;
-        while ((ch = conn.read()) != '$') {
-                s += ch;
-        }
-        return s;
-}
-
 /* Creates a client for the given args, if possible.
  * Otherwise exits with error code.
  */
-Connection init(int argc, char* argv[])
+MyClient::MyClient(int argc, char* argv[])
 {
-        if (argc != 3) {
-                cerr << "Usage: myclient host-name port-number" << endl;
+        if (argc != 3) 
+        {
+                std::cerr << "Usage: myclient host-name port-number" << std::endl;
                 exit(1);
         }
 
         int port = -1;
         try {
-                port = stoi(argv[2]);
-        } catch (exception& e) {
-                cerr << "Wrong port number. " << e.what() << endl;
+                port = std::stoi(argv[2]);
+        } catch (std::exception& e) {
+                std::cerr << "Wrong port number. " << e.what() << std::endl;
                 exit(2);
         }
-
-        Connection conn(argv[1], port);
-        if (!conn.isConnected()) {
-                cerr << "Connection attempt failed" << endl;
+        conn = std::make_shared<Connection>(argv[1], port);
+        if (!conn->isConnected()) 
+        {
+                std::cerr << "Connection attempt failed" << std::endl;
                 exit(3);
         }
-
-        return conn;
+        mh = MessageHandler(conn);
 }
 
-int app(const Connection& conn)
+int MyClient::run()
 {
-        cout << "Type a number: ";
         int nbr;
-        while (cin >> nbr) {
+        std::cout << "Type a number: " << std::endl;
+        
+        while(std::cin >> nbr) {
                 try {
-                        cout << nbr << " is ...";
-                        writeNumber(conn, nbr);
-                        string reply = readString(conn);
-                        cout << " " << reply << endl;
-                        cout << "Type another number: ";
+                        mh.sendInt(nbr);
+                        if(nbr == 2) {
+                                mh.sendStringParameter("First");
+                        }
+                        mh.sendInt(8);
+                        int ans = mh.recvInt();
+                        int ack = mh.recvInt(); // TODO depending on this receive one more
+                        int end = mh.recvInt();
+                        std::cout << "ans: " << ans << std::endl;
+                        std::cout << "Ack: " << ack << std::endl;
+                        std::cout << "end: " << end << std::endl;
                 } catch (ConnectionClosedException&) {
-                        cout << " no reply from server. Exiting." << endl;
+                        std::cout << " no reply from server. Exiting." << std::endl;
                         return 1;
                 }
         }
-        cout << "\nexiting.\n";
+        std::cout << "\nexiting.\n";
         return 0;
 }
 
 int main(int argc, char* argv[])
 {
-        Connection conn = init(argc, argv);
-        return app(conn);
+        MyClient client(argc, argv);
+        return client.run();
 }
