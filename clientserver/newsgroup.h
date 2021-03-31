@@ -14,11 +14,11 @@ using std::vector;
 
 class NewsGroup {
 public:
-    NewsGroup(string title) : id{rand()}, t{title} {}
+    NewsGroup(string title) : id{rand()%100}, t{title} {}
     void addArticle(const std::shared_ptr<Article>& a) { articles.push_back(a); }
     const vector<std::shared_ptr<Article>>& getArticles() {return articles;}
     void deleteArticle(int id);
-    const std::shared_ptr<Article>& getArticle(int id);
+    const std::shared_ptr<Article> getArticle(int id);
     int getId() {return id;}
     string getTitle() {return t;}
 

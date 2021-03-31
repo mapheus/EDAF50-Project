@@ -2,6 +2,7 @@
 #include "../protocol.h"
 
 #include <sstream>
+#include <iostream>
 
 /**
  * Create a message handler.
