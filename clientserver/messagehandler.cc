@@ -62,11 +62,13 @@ void MessageHandler::sendInt(int value)
  * @throws ConnectionClosedException
  *             If the server died
  */
+
 void MessageHandler::sendIntParameter(int param) 
 {
 	sendCode(static_cast<int>(Protocol::PAR_NUM));
 	sendInt(param);
 }
+
 
 /**
  * Transmit a string parameter, according to the protocol.
@@ -90,6 +92,7 @@ int MessageHandler::recvByte()
 {
 	try {
 		int code = conn->read();
+		std::cout << "read: " << code << std::endl;
 		return code;
 	} catch(ConnectionClosedException c) {
 		throw c;
@@ -134,6 +137,7 @@ int MessageHandler::recvInt()
  * @throws ConnectionClosedException
  *             If the server died
  */
+
 int MessageHandler::recvIntParameter() 
 {
 	int code = recvCode();
