@@ -20,10 +20,11 @@ public:
     int run();
     void inputHandler(int choice);
 
-
 private:
     std::shared_ptr<Connection> conn;
     MessageHandler mh{};
+    void printMenu();
+    void listArticles(int ngID);
 };
 
 #endif

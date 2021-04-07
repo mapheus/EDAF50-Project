@@ -41,38 +41,39 @@ void MyServer::inputHandler(int choice)
         {
                 case static_cast<int>(Protocol::COM_LIST_NG):
                 {
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
 
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_LIST_NG));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_LIST_NG));
                         std::vector<std::shared_ptr<NewsGroup>> newsgroups = storage->ListNewsGroups();
                         mh.sendIntParameter(newsgroups.size());
                         for(auto& e: newsgroups) {
                                 mh.sendIntParameter(e->getId());
                                 mh.sendStringParameter(e->getTitle());
                         }
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
                         break;
                 }
                 case static_cast<int>(Protocol::COM_CREATE_NG):
                 {
                         std::string groupName = mh.recvStringParameter();
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::COM_END)) {
                                 std::cout << "connectipondlcosed" << std::endl;
                                 throw new ConnectionClosedException;}
 
                         bool created = storage->CreateNewsGroup(groupName);
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_CREATE_NG));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_CREATE_NG));
                         if(created) 
                         {
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
+                                newsgroups.emplace_back(groupName);
                         } else {
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
                         }
                         
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
                         break;
                 }
                 case static_cast<int>(Protocol::COM_DELETE_NG):
@@ -81,46 +82,45 @@ void MyServer::inputHandler(int choice)
                         //ANS_DELETE_NG [ANS_ACK | ANS_NAK ERR_NG_DOES_NOT_EXIST] ANS_END
 
                         int groupId = mh.recvIntParameter();
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
                         bool deleted = storage->DeleteNewsGroup(groupId);
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_DELETE_NG));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_DELETE_NG));
                         if(!deleted) 
                         {       
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
                                 
                         } else {
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
-                                
+                                mh.sendCode(static_cast<int>(Protocol::ANS_ACK));    
                         }
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
                         break;
                 }
                 case static_cast<int>(Protocol::COM_LIST_ART):
                 {
                         //The reply contains the number of articles, followed by the identification numbers and titles of the articles
                         int id = mh.recvIntParameter();
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
 
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_LIST_ART));
                         std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(id);
+                        mh.sendCode(static_cast<int>(Protocol::ANS_LIST_ART));
                         if(ng == nullptr) 
                         {       
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
                                 
                         } else {
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
-                                mh.sendIntParameter(ng->getArticles().size());
+                                mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
+                                mh.sendIntParameter(it->getArticles().size());
                                 for(auto& e: ng->getArticles()) 
                                 {
                                         mh.sendIntParameter(e->getId());
                                         mh.sendStringParameter(e->getTitle());
                                 }
                         }
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
                         break;
                 }
                 case static_cast<int>(Protocol::COM_CREATE_ART):
@@ -131,22 +131,20 @@ void MyServer::inputHandler(int choice)
                         std::string title = mh.recvStringParameter();
                         std::string author = mh.recvStringParameter();
                         std::string text = mh.recvStringParameter();
-                        int end = mh.recvIntParameter();
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_CREATE_ART));
+                        int end = mh.recvCode();
+                        mh.sendCode(static_cast<int>(Protocol::ANS_CREATE_ART));
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
 
                         bool created = storage->CreateArticle(groupID, title, author, text);
                         if(!created) 
                         {       
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
                                 
-                        } 
-                        else 
-                        {
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
+                        } else {
+                                mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
                         }
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
 
                         break;
                 }
@@ -156,15 +154,15 @@ void MyServer::inputHandler(int choice)
                         //ANS_NAK [ERR_NG_DOES_NOT_EXIST | ERR_ART_DOES_NOT_EXIST]] ANS_END
                         int groupID = mh.recvIntParameter();
                         int articleID = mh.recvIntParameter();
-                        int end = mh.recvIntParameter();
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_DELETE_ART));
+                        int end = mh.recvCode();
+                        mh.sendCode(static_cast<int>(Protocol::ANS_DELETE_ART));
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
 
                         std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
                         if(ng == nullptr) 
                         {       
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
                                 
                         } 
                         else
@@ -172,16 +170,16 @@ void MyServer::inputHandler(int choice)
                                 std::shared_ptr<Article> article = ng->getArticle(articleID);
                                 if(article == nullptr)
                                 {
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
+                                        mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                        mh.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
                                 }
                                 else 
                                 {
                                         ng->deleteArticle(articleID);
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
+                                        mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
                                 }
                         } 
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
 
                         break;
                 }
@@ -189,36 +187,37 @@ void MyServer::inputHandler(int choice)
                 {
                         int groupID = mh.recvIntParameter();
                         int articleID = mh.recvIntParameter();
-                        int end = mh.recvIntParameter();
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_GET_ART));
+                        int end = mh.recvCode();
+                        mh.sendCode(static_cast<int>(Protocol::ANS_GET_ART));
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
                         std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
                         if(ng == nullptr) 
                         {       
-                                mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendIntParameter(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
                         } 
                         else
                         {
                                 auto article = ng->getArticle(articleID);
                                 if(article == nullptr) {
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_NAK));
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
+                                        mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                                        mh.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
                                 } 
                                 else 
                                 {
-                                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_ACK));
+                                        mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
                                         mh.sendStringParameter(article->getTitle());
                                         mh.sendStringParameter(article->getAuthor());
                                         mh.sendStringParameter(article->getText());
                                 }
                         }
-                        mh.sendIntParameter(static_cast<int>(Protocol::ANS_END));
+                        mh.sendCode(static_cast<int>(Protocol::ANS_END));
 
                         break;
                 }
                 default:
                 {
+                        std::cout << "Default closed connection" << std::endl;
                         throw new ConnectionClosedException;
                         break;
                 }
@@ -233,7 +232,8 @@ void MyServer::run() {
                 if (conn != nullptr) 
                 {
                         try {
-                                int nbr = mh.recvIntParameter();
+                                int nbr = mh.recvCode();
+                                std::cout << "number: " << nbr << std::endl;
                                 inputHandler(nbr);
 
                                 
