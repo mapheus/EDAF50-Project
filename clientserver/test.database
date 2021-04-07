@@ -1,0 +1,33 @@
+NewsGroup
+{
+id 183
+title asd
+}
+
+Article
+{
+newsgroup_id 183
+id 183
+title title
+author matt
+text text
+}
+
+Article
+{
+newsgroup_id 183
+id 183
+title Yoo
+author me
+text mycket text
+}
+
+Article
+{
+newsgroup_id 183
+id 183
+title hej
+author pa
+text dig
+}
+

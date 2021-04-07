@@ -7,6 +7,7 @@
 #include "protocol.h"
 #include "messagehandler.h"
 #include "newsgroup.h"
+#include "storage.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -25,7 +26,7 @@ public:
 
 
 private:
-    std::vector<NewsGroup> newsgroups;
+    std::unique_ptr<Storage> storage;
     std::unique_ptr<Server> server;
     MessageHandler mh{};
 };

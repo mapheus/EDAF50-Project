@@ -1,5 +1,5 @@
-#ifndef NEWSGROUP
-#define NEWSGROUP
+#ifndef NEWSGROUP_H
+#define NEWSGROUP_H
 
 #include <string>
 #include <cstdlib>
@@ -9,26 +9,22 @@
 #include <memory>
 #include <algorithm>
 
-using std::string;
-using std::vector;
-
-class NewsGroup {
+class NewsGroup
+{
 public:
-    NewsGroup(string title) : id{rand()%100}, t{title} {}
+    NewsGroup(const string& title) : m_ID{rand()%100}, t{title} {}
+    NewsGroup(const string& title, int id) : m_ID{id}, t{title} {}
     void addArticle(const std::shared_ptr<Article>& a) { articles.push_back(a); }
     const vector<std::shared_ptr<Article>>& getArticles() {return articles;}
-    void deleteArticle(int id);
+    bool deleteArticle(int id);
     const std::shared_ptr<Article> getArticle(int id);
-    int getId() {return id;}
+    int getId() {return m_ID;}
     string getTitle() {return t;}
 
 private:
-    int id; // TODO unique not random
-    string t; // TODO unique
     vector<std::shared_ptr<Article>> articles;
+    int m_ID; // TODO unique not random
+    string t; // TODO unique
 };
 
-
-
-
-#endif 
+#endif

@@ -1,13 +1,20 @@
 #include "newsgroup.h"
 #include <iostream>
 
-
-void NewsGroup::deleteArticle(int id) 
+bool NewsGroup::deleteArticle(int id) 
 { 
     auto it = std::find_if(articles.begin(), articles.end(), [&id](std::shared_ptr<Article>& a) {
         return a->getId() == id;
     });
-    articles.erase(it);
+    if(it != articles.end())
+    {
+        articles.erase(it);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
     
@@ -20,4 +27,3 @@ const std::shared_ptr<Article> NewsGroup::getArticle(int id)
     }
     return nullptr;
 }
-
