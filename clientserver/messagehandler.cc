@@ -92,7 +92,6 @@ int MessageHandler::recvByte()
 {
 	try {
 		int code = conn->read();
-		std::cout << "read: " << code << std::endl;
 		return code;
 	} catch(ConnectionClosedException c) {
 		throw c;

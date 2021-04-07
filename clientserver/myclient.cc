@@ -41,8 +41,8 @@ void MyClient::inputHandler(int choice)
         {
                 case static_cast<int>(Protocol::COM_LIST_NG):
                 {
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_LIST_NG)) {throw new ConnectionClosedException;}
                         int size = mh.recvIntParameter();
                         if(size != 0) 
@@ -58,7 +58,7 @@ void MyClient::inputHandler(int choice)
                                 std::string title = mh.recvStringParameter();
                                 std::cout << title << " , " << id << std::endl;
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -69,20 +69,20 @@ void MyClient::inputHandler(int choice)
                         //std::getline(std::cin, title);
                         std::getline(std::cin, title);
                         mh.sendStringParameter(title);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_CREATE_NG)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter(); // TODO depending on this receive one more
+                        int ack = mh.recvCode(); // TODO depending on this receive one more
                         if(ack == static_cast<int>(Protocol::ANS_NAK)) 
                         {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 std::cout << "Failed to create newsgroup" << std::endl;
                         }
                         else 
                         {
                                 std::cout << "Created newsgroup " << title << std::endl;
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
 
@@ -95,21 +95,21 @@ void MyClient::inputHandler(int choice)
                         std::cout << "Write newsgroup id to remove" << std::endl;
                         std::cin >> id;
                         mh.sendIntParameter(id);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_DELETE_NG)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter();
+                        int ack = mh.recvCode();
                         if(ack == static_cast<int>(Protocol::ANS_ACK)) 
                         {
                                 std::cout << "Removed newsgroup" << std::endl;
                         }
                         else 
                         {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 if (err != static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)) {throw new ConnectionClosedException;}
                                 std::cout << "Failed to remove newsgroup" << std::endl;
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -119,13 +119,13 @@ void MyClient::inputHandler(int choice)
                         std::cout << "Choose newsgroup id" << std::endl;
                         std::cin >> id;
                         mh.sendIntParameter(id);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_LIST_ART)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter();
+                        int ack = mh.recvCode();
                         if(ack != static_cast<int>(Protocol::ANS_ACK)) 
                         {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 if(err != static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)) {throw new ConnectionClosedException;}
                         } else 
                         {
@@ -144,7 +144,7 @@ void MyClient::inputHandler(int choice)
                                         std::cout << title << " , " << id << std::endl;
                                 }
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -169,21 +169,21 @@ void MyClient::inputHandler(int choice)
                         mh.sendStringParameter(title);
                         mh.sendStringParameter(author);
                         mh.sendStringParameter(text);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_CREATE_ART)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter();
+                        int ack = mh.recvCode();
                         if(ack == static_cast<int>(Protocol::ANS_ACK)) 
                         {
                                 std::cout << "Created article" << std::endl;
                         }
                         else 
                         {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 if (err != static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)) {throw new ConnectionClosedException;}
                                 std::cout << "Failed to find newsgroup" << std::endl;
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -197,22 +197,22 @@ void MyClient::inputHandler(int choice)
                         std::cout << "Choose article id" << std::endl;
                         std::cin >> articleID;
                         mh.sendIntParameter(articleID);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_DELETE_ART)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter();
+                        int ack = mh.recvCode();
                         if(ack == static_cast<int>(Protocol::ANS_ACK)) 
                         {
                                 std::cout << "Removed article" << std::endl;
                         } else {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 if(err == static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)) {
                                      std::cout << "Failed to find newsgroup" << std::endl;   
                                 } else {
                                         std::cout << "Failed to find article" << std::endl;   
                                 }
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -226,10 +226,10 @@ void MyClient::inputHandler(int choice)
                         std::cout << "Choose article id" << std::endl;
                         std::cin >> articleID;
                         mh.sendIntParameter(articleID);
-                        mh.sendIntParameter(static_cast<int>(Protocol::COM_END));
-                        int ans = mh.recvIntParameter();
+                        mh.sendCode(static_cast<int>(Protocol::COM_END));
+                        int ans = mh.recvCode();
                         if(ans != static_cast<int>(Protocol::ANS_GET_ART)) {throw new ConnectionClosedException;}
-                        int ack = mh.recvIntParameter();
+                        int ack = mh.recvCode();
                         if(ack == static_cast<int>(Protocol::ANS_ACK)) 
                         {
                                 std::cout << "title: " << mh.recvStringParameter() << std::endl;
@@ -237,14 +237,14 @@ void MyClient::inputHandler(int choice)
                                 std::cout << "text: " << std::endl;
                                 std::cout << mh.recvStringParameter() << std::endl;
                         } else {
-                                int err = mh.recvIntParameter();
+                                int err = mh.recvCode();
                                 if(err == static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST)) {
                                      std::cout << "Failed to find newsgroup" << std::endl;   
                                 } else {
                                         std::cout << "Failed to find article" << std::endl;   
                                 }
                         }
-                        int end = mh.recvIntParameter();
+                        int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::ANS_END)) {throw new ConnectionClosedException;}
                         break;
                 }
@@ -267,7 +267,7 @@ int MyClient::run()
                         std::cout << "Type a number: " << std::endl;
                         std::cin >> nbr;
                         std::cin.ignore();
-                        mh.sendIntParameter(nbr);
+                        mh.sendCode(nbr);
                         inputHandler(nbr);
                         /*
                         if(nbr == 2) { // TODO add input handler
