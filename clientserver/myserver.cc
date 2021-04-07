@@ -67,7 +67,6 @@ void MyServer::inputHandler(int choice)
                         if(created) 
                         {
                                 mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
-                                newsgroups.emplace_back(groupName);
                         } else {
                                 mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
                                 mh.sendCode(static_cast<int>(Protocol::ERR_NG_ALREADY_EXISTS));
@@ -113,7 +112,7 @@ void MyServer::inputHandler(int choice)
                                 
                         } else {
                                 mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
-                                mh.sendIntParameter(it->getArticles().size());
+                                mh.sendIntParameter(ng->getArticles().size());
                                 for(auto& e: ng->getArticles()) 
                                 {
                                         mh.sendIntParameter(e->getId());
