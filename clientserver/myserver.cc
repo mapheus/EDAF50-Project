@@ -46,6 +46,7 @@ void MyServer::inputHandler(int choice)
 
                         mh.sendCode(static_cast<int>(Protocol::ANS_LIST_NG));
                         std::vector<std::shared_ptr<NewsGroup>> newsgroups = storage->ListNewsGroups();
+                        std::cout << "size: " << newsgroups.size() << std::endl;
                         mh.sendIntParameter(newsgroups.size());
                         for(auto& e: newsgroups) {
                                 mh.sendIntParameter(e->getId());

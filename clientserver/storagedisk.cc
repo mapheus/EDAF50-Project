@@ -6,7 +6,16 @@
 
 bool StorageDisk::CreateNewsGroup(const std::string& title)
 {
-    //TODO : Check if name exists
+    std::vector<std::shared_ptr<NewsGroup>> newsgroups = ListNewsGroups();
+    auto it = find_if(newsgroups.begin(), newsgroups.end(), [&title](std::shared_ptr<NewsGroup>& ng) {
+            return title == ng->getTitle();
+    });
+    if(it != newsgroups.end())
+    {
+        return false;
+    }
+    else
+    {
 
     m_Out.open("test.database", std::ios::app);
     if(m_Out.is_open())
@@ -19,6 +28,7 @@ bool StorageDisk::CreateNewsGroup(const std::string& title)
         m_Out.close();
     }
     return true;
+    }
 }
 std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
 {
@@ -26,6 +36,7 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
     m_In.open("test.database");
     if(m_In.is_open())
     {
+        
         int ngid;
         std::string title;
         std::vector<int> articles;
@@ -34,6 +45,8 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
         std::string line;
         while(std::getline(m_In, line))
         {
+            std::cout << "line" << std::endl;
+            std::cout << line << std::endl;
             if(readingNewsgroup)
             {
                 std::istringstream iss(line);
@@ -49,8 +62,9 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
                     title = line.substr(6);
                 }
 
-                if(line == "}")
+                if(line == "}" || line == "} " || word == "}" || word == "} " )
                 {
+                    std::cout << "Inne i slutklämma" << std::endl;
                     readingNewsgroup = false;
                     std::shared_ptr<NewsGroup> ng = std::make_shared<NewsGroup>(title, ngid);
                     newsgroups.push_back(ng);
@@ -96,7 +110,6 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
                 }
                 if(word == "title")
                 {
-                    std::cout << line << std::endl;
                     title = line.substr(6);
                 }
                 
@@ -203,7 +216,7 @@ bool StorageDisk::CreateArticle(int newsgroup_id, const std::string& title,const
             m_Out << "id " << rand() % 200 << std::endl;
             m_Out << "title " << title << std::endl;
             m_Out << "author " << author << std::endl;
-            m_Out << "text " << text << std::endl;
+            m_Out << "text \n" << text << std::endl;
             m_Out << "}" << std::endl << std::endl;
             m_Out.close();
         }
@@ -248,28 +261,33 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
                 }
                 if(word == "title")
                 {
-                    iss >> word;
-                    title = word;
+                    title = line.substr(6);
                 }
                 if(word == "author")
                 {
-                    iss >> word;
-                    author = word;
-                }
-                if(word == "text")
-                {
-                    readingText=true;
-                }
-                if(readingText && line != "}")
-                {
-                    text.append(line);
+                    author = line.substr(7);
                 }
 
                 if(line == "}" || line == "} " || word == "}\n" || word == "}")
                 {
+                    readingText = false;
                     readingArticle = false;
+                    text.erase(text.end()-1);
                     articles.push_back(std::make_shared<Article>(newsgroup_id, aid, title, author, text));
+                    text = "";
                 }
+
+                if(readingText && readingArticle && !(line == "}" || line == "} " || word == "}\n" || word == "}"))
+                {
+                    text.append(line);
+                    text.append("\n");
+                }
+
+                if(word == "text")
+                {
+                    readingText=true;
+                }
+
             }
             if(line == "Article")
             {
@@ -313,7 +331,7 @@ bool StorageDisk::DeleteArticle(int id)
                     startIndex = lineIndex;
                 }
             }
-            if(word == "}" && found) 
+            if(word == "} " || word == "}\n" || line == "}" || line == "} " && found) 
             {
                 lastIndex = lineIndex;
                 m_In.close();
@@ -422,7 +440,6 @@ bool StorageDisk::DeleteArticle(int groupID, int id)
             remove("test.database");
             rename("test.database2", "test.database");
         }
-        
     }
     return foundNG && foundID;
 }
