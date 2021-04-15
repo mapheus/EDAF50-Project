@@ -3,7 +3,7 @@
 #include "storagememory.h"
 #include "storagedisk.h"
 
-//#define MEMORY
+#define MEMORY
 
 MyServer::MyServer(int argc, char* argv[])
 {
