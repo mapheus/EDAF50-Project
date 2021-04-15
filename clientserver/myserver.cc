@@ -29,7 +29,7 @@ MyServer::MyServer(int argc, char* argv[])
         }
 
         #ifdef MEMORY
-        //storage = std::make_unique<StorageMemory>();
+        storage = std::make_unique<StorageMemory>();
         #else
         storage = std::make_unique<StorageDisk>();
         #endif
@@ -148,9 +148,7 @@ void MyServer::inputHandler(int choice)
                         break;
                 }
                 case static_cast<int>(Protocol::COM_DELETE_ART):
-                {       //COM_DELETE_ART num_p num_p COM_END
-                        //ANS_DELETE_ART [ANS_ACK |
-                        //ANS_NAK [ERR_NG_DOES_NOT_EXIST | ERR_ART_DOES_NOT_EXIST]] ANS_END
+                {       
                         int groupID = mh.recvIntParameter();
                         int articleID = mh.recvIntParameter();
                         int end = mh.recvCode();

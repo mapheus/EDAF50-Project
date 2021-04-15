@@ -101,11 +101,7 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
                     iss >> word;
                     title = word;
                 }
-                if(word == "article")
-                {
-                    iss >> word;
-                    articles.push_back(std::stoi(word));
-                }
+                // TODO fixa articles
                 
                 if(line == "}")
                 {
@@ -115,6 +111,7 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
                         newsgroup = std::make_shared<NewsGroup>(title, ngid);
                         for(auto& i : articles)
                         {
+                            std::cout << "ARticles: " << std::endl;
                             newsgroup->addArticle(GetArticle(ngid, i));
                         }
                         m_In.close();
@@ -145,13 +142,49 @@ bool StorageDisk::DeleteNewsGroup(int id)
         
         bool readingNewsgroup = false;
         std::string line;
+        int delIndex = 0;
         while(std::getline(m_In, line))
         {
-
+            std::istringstream iss(line);
+            std::string word;
+            iss >> word;
+            if(word == "id")
+            {
+                iss >> word;
+                ngid = std::stoi(word);
+                std::cout << ngid << std::endl;
+                if(ngid==id)
+                {
+                    found = true;
+                    m_In.close();
+                    break;
+                }
+            }
+            ++delIndex;
         }
-
-    m_In.close();
+        // Read file again and only add rows that does not include id to remove
+        m_In.open("test.database");
+        // Create database2
+        m_Out.open("test.database2", std::ios::app);
+        int index = 0;
+        while(std::getline(m_In, line))
+        {
+            std::istringstream iss(line);
+            std::string word;
+            iss >> word;
+            if(index < delIndex - 2 || index > delIndex + 2) 
+            {
+                m_Out << line << std::endl;
+            }
+            ++index;
+        }
+        m_In.close();
+        m_Out.close();
+        remove("test.database");
+        rename("test.database2", "test.database");
     }
+    while(DeleteArticle(id)) {}
+
     return true;
 }
 
@@ -179,6 +212,7 @@ bool StorageDisk::CreateArticle(int newsgroup_id, const std::string& title,const
 
 std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id) 
 {
+    std::cout << "GETARTICLE" << std::endl; 
     std::shared_ptr<Article> article;
     m_In.open("test.database");
     if(m_In.is_open())
@@ -254,4 +288,73 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
     m_In.close();
     }
     return nullptr;
+}
+
+bool StorageDisk::DeleteArticle(int id)
+{ 
+    bool found = false;
+    m_In.open("test.database");
+    if(m_In.is_open())
+    {
+        int ngid;
+        std::string title;
+        std::vector<int> articles;
+        
+        bool readingNewsgroup = false;
+        std::string line;
+        int startIndex = INT16_MAX;
+        int lineIndex = 0;
+        int lastIndex = 0; 
+        while(std::getline(m_In, line))
+        {
+            std::istringstream iss(line);
+            std::string word;
+            iss >> word;
+            if(word == "newsgroup_id")
+            {
+                iss >> word;
+                ngid = std::stoi(word);
+                std::cout << ngid << std::endl;
+                if(ngid==id)
+                {
+                    found = true;
+                    startIndex = lineIndex;
+                }
+            }
+            if(word == "}" && found) 
+            {
+                lastIndex = lineIndex;
+                m_In.close();
+                break;
+            }
+            
+            ++lineIndex;
+        }
+        if(found) {
+            // Read file again and only add rows that does not include id to remove
+            m_In.open("test.database");
+            // Create database2
+            m_Out.open("test.database2", std::ios::app);
+            int index = 0;
+            std::cout << "START INDEX: " << startIndex << std::endl; 
+            std::cout << "LAST INDEX: " << lastIndex << std::endl; 
+            while(std::getline(m_In, line))
+            {
+                std::istringstream iss(line);
+                std::string word;
+                iss >> word;
+                if(index < startIndex - 2 || index > lastIndex) 
+                {
+                    m_Out << line << std::endl;
+                }
+                ++index;
+            }
+            m_In.close();
+            m_Out.close();
+            remove("test.database");
+            rename("test.database2", "test.database");
+        }
+        
+    }
+    return found;
 }

@@ -18,6 +18,7 @@ public:
 private:
     std::ifstream m_In;
     std::ofstream m_Out;
+    bool DeleteArticle(int id);
 };
 
 #endif
