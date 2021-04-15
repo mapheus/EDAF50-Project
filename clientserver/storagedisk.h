@@ -15,7 +15,7 @@ public:
     virtual bool DeleteArticle(int groupID, int id) override;
 
     virtual bool CreateArticle(int newsgroup_id, const std::string& title,const std::string& author,const std::string& text) override;
-    virtual std::vector<std::shared_ptr<Article>> GetArticles(int newsgroup_id) override;
+    std::vector<std::shared_ptr<Article>> GetArticles(int newsgroup_id);
 private:
     std::ifstream m_In;
     std::ofstream m_Out;

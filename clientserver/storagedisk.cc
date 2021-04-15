@@ -46,8 +46,7 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
                 }
                 if(word == "title")
                 {
-                    iss >> word;
-                    title = word;
+                    title = line.substr(6);
                 }
 
                 if(line == "}")
@@ -97,8 +96,8 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
                 }
                 if(word == "title")
                 {
-                    iss >> word;
-                    title = word;
+                    std::cout << line << std::endl;
+                    title = line.substr(6);
                 }
                 
                 if(word == "} " || word == "}\n" || line == "}" || line == "} ")
