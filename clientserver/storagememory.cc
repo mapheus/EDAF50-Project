@@ -56,9 +56,3 @@ bool StorageMemory::CreateArticle(int newsgroup_id, const std::string& title,con
         return false;
     }
 }
-
-std::shared_ptr<Article> StorageMemory::GetArticle(int newsgroup_id, int id) 
-{
-    std::shared_ptr<NewsGroup> ng = GetNewsGroup(newsgroup_id);
-    return ng->getArticle(id);
-}

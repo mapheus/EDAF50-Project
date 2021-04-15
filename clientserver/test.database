@@ -1,48 +1,15 @@
 NewsGroup
 {
 id 183
-title asd
-}
-
-Article
-{
-newsgroup_id 183
-id 183
-title title
-author matt
-text text
-}
-
-Article
-{
-newsgroup_id 183
-id 183
-title Yoo
-author me
-text mycket text
-}
-
-Article
-{
-newsgroup_id 183
-id 183
-title hej
-author pa
-text dig
-}
-
-NewsGroup
-{
-id 183
-title Hej
+title World
 }
 
 Article
 {
 newsgroup_id 183
 id 86
-title World
+title WOW
 author me
-text haha
+text text
 }
 

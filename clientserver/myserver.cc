@@ -29,7 +29,7 @@ MyServer::MyServer(int argc, char* argv[])
         }
 
         #ifdef MEMORY
-        //storage = std::make_unique<StorageMemory>();
+        storage = std::make_unique<StorageMemory>();
         #else
         storage = std::make_unique<StorageDisk>();
         #endif

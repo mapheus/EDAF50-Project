@@ -60,7 +60,6 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
             if(line == "NewsGroup")
             {
                 readingNewsgroup = true;
-                std::cout << "READING NEWSGROUP" << std::endl;
             }
         }
 
@@ -76,7 +75,6 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
     {
         int ngid;
         std::string title;
-        std::vector<int> articles;
         bool found = false;
         
         bool readingNewsgroup = false;
@@ -88,36 +86,36 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
                 std::istringstream iss(line);
                 std::string word;
                 iss >> word;
+                std::cout << word << std::endl;
                 if(word == "id")
                 {
                     iss >> word;
                     ngid = std::stoi(word);
                     std::cout << ngid << std::endl;
                     if(ngid==id)
+                    {
                         found = true;
+                    }
                 }
                 if(word == "title")
                 {
                     iss >> word;
                     title = word;
                 }
-                if(word == "article")
-                {
-                    iss >> word;
-                    articles.push_back(std::stoi(word));
-                }
                 
-                if(line == "}")
+                if(word == "} " || word == "}\n" || line == "}" || line == "} ")
                 {
                     readingNewsgroup = false;
                     if(found)
                     {
-                        newsgroup = std::make_shared<NewsGroup>(title, ngid);
-                        for(auto& i : articles)
-                        {
-                            newsgroup->addArticle(GetArticle(ngid, i));
-                        }
                         m_In.close();
+                        newsgroup = std::make_shared<NewsGroup>(title, ngid);
+                        std::vector<std::shared_ptr<Article>> articles = GetArticles(ngid);
+                        for(auto& e : articles)
+                        {
+                            std::cout << "FOUND ARTICLES" << std::endl;
+                            newsgroup->addArticle(e);
+                        }
                         return newsgroup;
                     }
                 }
@@ -177,9 +175,10 @@ bool StorageDisk::CreateArticle(int newsgroup_id, const std::string& title,const
     return false;
 }
 
-std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id) 
+
+std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
 {
-    std::shared_ptr<Article> article;
+    std::vector<std::shared_ptr<Article>> articles;
     m_In.open("test.database");
     if(m_In.is_open())
     {
@@ -188,8 +187,6 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
         std::string title;
         std::string author;
         std::string text;
-
-        bool found = false;
         
         bool readingArticle = false;
         std::string line;
@@ -197,6 +194,7 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
         {
             if(readingArticle)
             {
+
                 std::istringstream iss(line);
                 std::string word;
                 iss >> word;
@@ -204,19 +202,11 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
                 {
                     iss >> word;
                     ngid = std::stoi(word);
-                    if(ngid == newsgroup_id)
-                        found = true;
-                    else
-                        found = false;
                 }
                 if(word == "id")
                 {
                     iss >> word;
                     aid = std::stoi(word);
-                    if(aid == id)
-                        found = true;
-                    else
-                        found = false;
                 }
                 if(word == "title")
                 {
@@ -234,15 +224,11 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
                     text = word;
                 }
 
-                if(line == "}")
+                if(line == "}" || line == "} " || word == "}\n" || word == "}")
                 {
                     readingArticle = false;
-                    if(found)
-                    {
-                        article = std::make_shared<Article>(newsgroup_id, aid, title, author, text);
-                        m_In.close();
-                        return article;
-                    }
+                    articles.push_back(std::make_shared<Article>(newsgroup_id, aid, title, author, text));
+                    m_In.close();
                 }
             }
             if(line == "Article")
@@ -253,5 +239,5 @@ std::shared_ptr<Article> StorageDisk::GetArticle(int newsgroup_id, int id)
 
     m_In.close();
     }
-    return nullptr;
+    return articles;
 }

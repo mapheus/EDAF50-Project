@@ -23,7 +23,7 @@ public:
     virtual bool DeleteNewsGroup(int id) = 0;
 
     virtual bool CreateArticle(int newsgroup_id, const std::string& title,const std::string& author,const std::string& text ) = 0;
-    virtual std::shared_ptr<Article> GetArticle(int inewsgroup_idd, int id) = 0;
+    virtual std::vector<std::shared_ptr<Article>> GetArticles(int newsgroup_id) = 0;
 private:
 
 };
