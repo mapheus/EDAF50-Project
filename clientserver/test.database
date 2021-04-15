@@ -1,0 +1,28 @@
+NewsGroup
+{
+id 183
+title Group 1
+}
+
+
+NewsGroup
+{
+id 177
+title This is a group with a long title, but the server must be able to handle that.
+}
+
+
+Article
+{
+newsgroup_id 183
+id 193
+title Article 2
+author Another author
+text 
+A somewhat longer text,
+containing more than one line.
+To be exact, three lines.
+
+}
+
+
