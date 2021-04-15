@@ -64,4 +64,5 @@ bool StorageMemory::CreateArticle(int newsgroup_id, const std::string& title,con
 bool StorageMemory::DeleteArticle(int groupID, int id)
 {
     GetNewsGroup(groupID)->deleteArticle(id);
+    return true;
 }

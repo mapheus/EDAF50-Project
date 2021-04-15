@@ -1,22 +1,13 @@
-
-
-
-
-
+NewsGroup
+{
+id 115
+title Group 1
+}
 
 
 NewsGroup
 {
-id 177
-title World
-}
-
-Article
-{
-newsgroup_id 177
-id 115
-title WOW
-author me
-text detta e en mkt vacker text
+id 135
+title el gle glelg lelg elg le l
 }
 

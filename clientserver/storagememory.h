@@ -11,8 +11,9 @@ public:
     virtual std::shared_ptr<NewsGroup> GetNewsGroup(int id) override;
     virtual bool DeleteNewsGroup(int id) override;
     virtual bool DeleteArticle(int groupID, int id) override;
-
+    
     virtual bool CreateArticle(int newsgroup_id, const std::string& title,const std::string& author,const std::string& text) override;
+    
 private:
     std::vector<std::shared_ptr<NewsGroup>> m_NewsGroups;
 };
