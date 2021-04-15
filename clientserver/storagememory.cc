@@ -15,10 +15,12 @@ bool StorageMemory::CreateNewsGroup(const std::string& title)
         return false;
     }
 }
+
 std::vector<std::shared_ptr<NewsGroup>> StorageMemory::ListNewsGroups()
 {
     return m_NewsGroups;
 }
+
 std::shared_ptr<NewsGroup> StorageMemory::GetNewsGroup(int id)
 {
     auto it = find_if(m_NewsGroups.begin(), m_NewsGroups.end(), [&id](std::shared_ptr<NewsGroup>& ng) {
@@ -30,6 +32,7 @@ std::shared_ptr<NewsGroup> StorageMemory::GetNewsGroup(int id)
         return nullptr;
     }
 }
+
 bool StorageMemory::DeleteNewsGroup(int id)
 {
     auto it = find_if(m_NewsGroups.begin(), m_NewsGroups.end(), [&id](std::shared_ptr<NewsGroup>& ng) {

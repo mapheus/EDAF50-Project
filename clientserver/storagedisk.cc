@@ -16,20 +16,20 @@ bool StorageDisk::CreateNewsGroup(const std::string& title)
     }
     else
     {
-
-    m_Out.open("test.database", std::ios::app);
-    if(m_Out.is_open())
-    {
-        m_Out << "NewsGroup" << std::endl;
-        m_Out << "{" << std::endl;
-        m_Out << "id " << rand() % 200 << std::endl;
-        m_Out << "title " << title << std::endl;
-        m_Out << "}" << std::endl << std::endl;
-        m_Out.close();
-    }
-    return true;
+        m_Out.open("test.database", std::ios::app);
+        if(m_Out.is_open())
+        {
+            m_Out << "NewsGroup" << std::endl;
+            m_Out << "{" << std::endl;
+            m_Out << "id " << rand() % 200 << std::endl;
+            m_Out << "title " << title << std::endl;
+            m_Out << "}" << std::endl << std::endl;
+            m_Out.close();
+        }
+        return true;
     }
 }
+
 std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
 {
     std::vector<std::shared_ptr<NewsGroup>> newsgroups;
@@ -64,7 +64,6 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
 
                 if(line == "}" || line == "} " || word == "}" || word == "} " )
                 {
-                    std::cout << "Inne i slutklämma" << std::endl;
                     readingNewsgroup = false;
                     std::shared_ptr<NewsGroup> ng = std::make_shared<NewsGroup>(title, ngid);
                     newsgroups.push_back(ng);
@@ -80,6 +79,7 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
     }
     return newsgroups;
 }
+
 std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
 {
     std::shared_ptr<NewsGroup> newsgroup;
@@ -139,6 +139,7 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
     }
     return nullptr;
 }
+
 bool StorageDisk::DeleteNewsGroup(int id)
 { 
     m_In.open("test.database");
@@ -172,26 +173,26 @@ bool StorageDisk::DeleteNewsGroup(int id)
         m_In.close();
         if(found)
         {
-        // Read file again and only add rows that does not include id to remove
-        m_In.open("test.database");
-        // Create database2
-        m_Out.open("test.database2", std::ios::app);
-        int index = 0;
-        while(std::getline(m_In, line))
-        {
-            std::istringstream iss(line);
-            std::string word;
-            iss >> word;
-            if(index < delIndex - 2 || index > delIndex + 2) 
+            // Read file again and only add rows that does not include id to remove
+            m_In.open("test.database");
+            // Create database2
+            m_Out.open("test.database2", std::ios::app);
+            int index = 0;
+            while(std::getline(m_In, line))
             {
-                m_Out << line << std::endl;
+                std::istringstream iss(line);
+                std::string word;
+                iss >> word;
+                if(index < delIndex - 2 || index > delIndex + 2) 
+                {
+                    m_Out << line << std::endl;
+                }
+                ++index;
             }
-            ++index;
-        }
-        m_In.close();
-        m_Out.close();
-        remove("test.database");
-        rename("test.database2", "test.database");
+            m_In.close();
+            m_Out.close();
+            remove("test.database");
+            rename("test.database2", "test.database");
         }
     }
     bool t = true;
@@ -199,7 +200,6 @@ bool StorageDisk::DeleteNewsGroup(int id)
     {
         t = DeleteArticle(id);
     }
-
     return true;
 }
 
@@ -245,7 +245,6 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
         {
             if(readingArticle)
             {
-
                 std::istringstream iss(line);
                 std::string word;
                 iss >> word;
@@ -292,10 +291,9 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
             if(line == "Article")
             {
                 readingArticle = true;
-            }
+            }   
         }
-
-    m_In.close();
+        m_In.close();
     }
     return articles;
 }
@@ -306,7 +304,6 @@ bool StorageDisk::DeleteArticle(int id)
     m_In.open("test.database");
     if(m_In.is_open())
     {
-
         int ngid;
         std::string title;
         std::vector<int> articles;
@@ -340,7 +337,8 @@ bool StorageDisk::DeleteArticle(int id)
             
             ++lineIndex;
         }
-        if(found) {
+        if(found) 
+        {
             // Read file again and only add rows that does not include id to remove
             m_In.open("test.database");
             // Create database2

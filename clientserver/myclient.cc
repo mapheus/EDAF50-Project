@@ -334,21 +334,6 @@ int MyClient::run()
                         } else {
                                 std::cout << "Wrong input, write a number between 1 and 7." << std::endl;
                         }
-                        
-                        
-                        
-                        /*
-                        if(nbr == 2) { // TODO add input handler
-                                mh.sendStringParameter("First");
-                        }
-                        mh.sendIntParameter(8);
-                        int ans = mh.recvInt();
-                        int ack = mh.recvInt(); // TODO depending on this receive one more
-                        int end = mh.recvInt();
-                        std::cout << "ans: " << ans << std::endl;
-                        std::cout << "Ack: " << ack << std::endl;
-                        std::cout << "end: " << end << std::endl;
-                        */
                 } catch (ConnectionClosedException&) {
                         std::cout << " no reply from server. Exiting." << std::endl;
                         return 1;

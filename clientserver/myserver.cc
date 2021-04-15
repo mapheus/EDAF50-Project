@@ -78,9 +78,6 @@ void MyServer::inputHandler(int choice)
                 }
                 case static_cast<int>(Protocol::COM_DELETE_NG):
                 {
-                        //COM_DELETE_NG num_p COM_END
-                        //ANS_DELETE_NG [ANS_ACK | ANS_NAK ERR_NG_DOES_NOT_EXIST] ANS_END
-
                         int groupId = mh.recvIntParameter();
                         int end = mh.recvCode();
                         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
@@ -125,8 +122,6 @@ void MyServer::inputHandler(int choice)
                 }
                 case static_cast<int>(Protocol::COM_CREATE_ART):
                 {
-                        //COM_CREATE_ART num_p string_p string_p string_p COM_END
-                        //ANS_CREATE_ART [ANS_ACK | ANS_NAK ERR_NG_DOES_NOT_EXIST] ANS_END
                         int groupID = mh.recvIntParameter();
                         std::string title = mh.recvStringParameter();
                         std::string author = mh.recvStringParameter();
@@ -149,9 +144,7 @@ void MyServer::inputHandler(int choice)
                         break;
                 }
                 case static_cast<int>(Protocol::COM_DELETE_ART):
-                {       //COM_DELETE_ART num_p num_p COM_END
-                        //ANS_DELETE_ART [ANS_ACK |
-                        //ANS_NAK [ERR_NG_DOES_NOT_EXIST | ERR_ART_DOES_NOT_EXIST]] ANS_END
+                {       
                         int groupID = mh.recvIntParameter();
                         int articleID = mh.recvIntParameter();
                         int end = mh.recvCode();
@@ -235,9 +228,6 @@ void MyServer::run() {
                                 int nbr = mh.recvCode();
                                 std::cout << "number: " << nbr << std::endl;
                                 inputHandler(nbr);
-
-                                
-                                //writeString(conn, result);
                         } catch (ConnectionClosedException&) {
                                 server->deregisterConnection(conn);
                                 std::cout << "Client closed connection" << std::endl;
