@@ -35,6 +35,46 @@ MyServer::MyServer(int argc, char* argv[])
         #endif
 }
 
+// Helper functions
+ArticleInfo MyServer::GetArticleAndSendInfo()
+{
+        int groupID = mh.recvIntParameter();
+        int articleID = mh.recvIntParameter();
+        int end = mh.recvCode();
+
+        ArticleInfo info;
+        info.groupID = groupID;
+        info.articleID = articleID;
+
+        mh.sendCode(static_cast<int>(Protocol::ANS_GET_ART));
+        if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
+        std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
+        if(ng == nullptr) 
+        {       
+                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
+                info.success = false;
+                return info;
+        } 
+        else
+        {
+                auto article = ng->getArticle(articleID);
+                info.article = article;
+                if(article == nullptr) {
+                        mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
+                        mh.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
+                        info.success = false;
+                        return info;
+                } 
+                else 
+                {
+                        mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
+                        info.success = true;
+                        return info;
+                }
+        }
+}
+
 void MyServer::inputHandler(int choice) 
 {
         switch(choice) 
@@ -46,7 +86,6 @@ void MyServer::inputHandler(int choice)
 
                         mh.sendCode(static_cast<int>(Protocol::ANS_LIST_NG));
                         std::vector<std::shared_ptr<NewsGroup>> newsgroups = storage->ListNewsGroups();
-                        std::cout << "size: " << newsgroups.size() << std::endl;
                         mh.sendIntParameter(newsgroups.size());
                         for(auto& e: newsgroups) {
                                 mh.sendIntParameter(e->getId());
@@ -149,67 +188,24 @@ void MyServer::inputHandler(int choice)
                         break;
                 }
                 case static_cast<int>(Protocol::COM_DELETE_ART):
-                {       //COM_DELETE_ART num_p num_p COM_END
-                        //ANS_DELETE_ART [ANS_ACK |
-                        //ANS_NAK [ERR_NG_DOES_NOT_EXIST | ERR_ART_DOES_NOT_EXIST]] ANS_END
-                        int groupID = mh.recvIntParameter();
-                        int articleID = mh.recvIntParameter();
-                        int end = mh.recvCode();
-                        mh.sendCode(static_cast<int>(Protocol::ANS_DELETE_ART));
-                        if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
-
-                        std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
-                        if(ng == nullptr) 
-                        {       
-                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
-                                
-                        } 
-                        else
+                {       
+                        ArticleInfo info = GetArticleAndSendInfo();
+                        if(info.success)
                         {
-                                std::shared_ptr<Article> article = ng->getArticle(articleID);
-                                if(article == nullptr)
-                                {
-                                        mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
-                                        mh.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
-                                }
-                                else 
-                                {
-                                        storage->DeleteArticle(groupID, articleID);
-                                        mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
-                                }
-                        } 
+                                storage->DeleteArticle(info.groupID, info.articleID);
+                        }
                         mh.sendCode(static_cast<int>(Protocol::ANS_END));
 
                         break;
                 }
                 case static_cast<int>(Protocol::COM_GET_ART):
                 {
-                        int groupID = mh.recvIntParameter();
-                        int articleID = mh.recvIntParameter();
-                        int end = mh.recvCode();
-                        mh.sendCode(static_cast<int>(Protocol::ANS_GET_ART));
-                        if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
-                        std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
-                        if(ng == nullptr) 
-                        {       
-                                mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
-                                mh.sendCode(static_cast<int>(Protocol::ERR_NG_DOES_NOT_EXIST));
-                        } 
-                        else
+                        ArticleInfo info = GetArticleAndSendInfo();
+                        if(info.success)
                         {
-                                auto article = ng->getArticle(articleID);
-                                if(article == nullptr) {
-                                        mh.sendCode(static_cast<int>(Protocol::ANS_NAK));
-                                        mh.sendCode(static_cast<int>(Protocol::ERR_ART_DOES_NOT_EXIST));
-                                } 
-                                else 
-                                {
-                                        mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
-                                        mh.sendStringParameter(article->getTitle());
-                                        mh.sendStringParameter(article->getAuthor());
-                                        mh.sendStringParameter(article->getText());
-                                }
+                                mh.sendStringParameter(info.article->getTitle());
+                                mh.sendStringParameter(info.article->getAuthor());
+                                mh.sendStringParameter(info.article->getText());
                         }
                         mh.sendCode(static_cast<int>(Protocol::ANS_END));
 
@@ -223,6 +219,8 @@ void MyServer::inputHandler(int choice)
                 }
         }
 }
+
+
 
 void MyServer::run() {
         while (true) 

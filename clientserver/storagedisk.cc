@@ -36,8 +36,7 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
     m_In.open("test.database");
     if(m_In.is_open())
     {
-        
-        int ngid;
+        int ngid = -1;
         std::string title;
         std::vector<int> articles;
         
@@ -64,7 +63,6 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
 
                 if(line == "}" || line == "} " || word == "}" || word == "} " )
                 {
-                    std::cout << "Inne i slutklämma" << std::endl;
                     readingNewsgroup = false;
                     std::shared_ptr<NewsGroup> ng = std::make_shared<NewsGroup>(title, ngid);
                     newsgroups.push_back(ng);
@@ -86,7 +84,7 @@ std::shared_ptr<NewsGroup> StorageDisk::GetNewsGroup(int id)
     m_In.open("test.database");
     if(m_In.is_open())
     {
-        int ngid;
+        int ngid = -1;
         std::string title;
         bool found = false;
         
@@ -144,12 +142,11 @@ bool StorageDisk::DeleteNewsGroup(int id)
     m_In.open("test.database");
     if(m_In.is_open())
     {
-        int ngid;
+        int ngid = -1;
         std::string title;
         std::vector<int> articles;
         bool found = false;
         
-        bool readingNewsgroup = false;
         std::string line;
         int delIndex = 0;
         while(std::getline(m_In, line))
@@ -232,8 +229,8 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
     m_In.open("test.database");
     if(m_In.is_open())
     {
-        int aid;
-        int ngid;
+        int aid = -1;
+        int ngid = -1;
         std::string title;
         std::string author;
         std::string text;
@@ -311,7 +308,6 @@ bool StorageDisk::DeleteArticle(int id)
         std::string title;
         std::vector<int> articles;
         
-        bool readingNewsgroup = false;
         std::string line;
         int startIndex = INT16_MAX;
         int lineIndex = 0;
@@ -331,7 +327,7 @@ bool StorageDisk::DeleteArticle(int id)
                     startIndex = lineIndex;
                 }
             }
-            if(word == "} " || word == "}\n" || line == "}" || line == "} " && found) 
+            if((word == "} " || word == "}\n" || line == "}" || line == "} ") && found) 
             {
                 lastIndex = lineIndex;
                 m_In.close();
@@ -375,7 +371,6 @@ bool StorageDisk::DeleteArticle(int groupID, int id)
     m_In.open("test.database");
     if(m_In.is_open())
     {   
-        bool readingNewsgroup = false;
         std::string line;
         int startIndex = INT16_MAX;
         int lineIndex = 0;

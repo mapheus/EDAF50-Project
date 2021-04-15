@@ -14,8 +14,8 @@ class Article {
 public:
     Article(int newsgroup_id, string ti, string au, string te) : m_NewsGroupID{newsgroup_id}, m_ID{rand()%100}, m_Title{ti}, m_Author{au}, m_Text{te} {}
     Article(int newsgroup_id, int id, string ti, string au, string te) : m_NewsGroupID{newsgroup_id}, m_ID{id}, m_Title{ti}, m_Author{au}, m_Text{te} {}
-    const int getNewsGroupID() { return m_NewsGroupID;}
-    const int getId() {return m_ID;}
+    int getNewsGroupID() { return m_NewsGroupID;}
+    int getId() {return m_ID;}
     const string& getTitle() {return m_Title;}
     const string& getAuthor() {return m_Author;}
     const string& getText() {return m_Text;}

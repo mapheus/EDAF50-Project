@@ -16,6 +16,13 @@
 #include <string>
 #include <vector>
 
+struct ArticleInfo
+{
+    std::shared_ptr<Article> article;
+    int groupID;
+    int articleID;
+    bool success;
+};
 
 class MyServer {
 public:
@@ -24,6 +31,8 @@ public:
     void run();
     void inputHandler(int choice);
 
+private:
+    ArticleInfo GetArticleAndSendInfo();
 
 private:
     std::unique_ptr<Storage> storage;
