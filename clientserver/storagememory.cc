@@ -24,7 +24,11 @@ std::shared_ptr<NewsGroup> StorageMemory::GetNewsGroup(int id)
     auto it = find_if(m_NewsGroups.begin(), m_NewsGroups.end(), [&id](std::shared_ptr<NewsGroup>& ng) {
             return id == ng->getId();
     });
-    return *it;
+    if(it != m_NewsGroups.end()) {
+        return *it;
+    } else {
+        return nullptr;
+    }
 }
 bool StorageMemory::DeleteNewsGroup(int id)
 {
@@ -55,4 +59,9 @@ bool StorageMemory::CreateArticle(int newsgroup_id, const std::string& title,con
     {
         return false;
     }
+}
+
+bool StorageMemory::DeleteArticle(int groupID, int id)
+{
+    GetNewsGroup(groupID)->deleteArticle(id);
 }

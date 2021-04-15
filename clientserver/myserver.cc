@@ -174,7 +174,7 @@ void MyServer::inputHandler(int choice)
                                 }
                                 else 
                                 {
-                                        ng->deleteArticle(articleID);
+                                        storage->DeleteArticle(groupID, articleID);
                                         mh.sendCode(static_cast<int>(Protocol::ANS_ACK));
                                 }
                         } 
