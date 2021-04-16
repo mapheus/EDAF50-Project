@@ -3,6 +3,12 @@
 #include <iostream>
 
 #include <stdlib.h>
+#include <time.h>  
+
+StorageDisk::StorageDisk()
+{
+    srand(time(NULL));
+}
 
 bool StorageDisk::CreateNewsGroup(const std::string& title)
 {
@@ -21,7 +27,7 @@ bool StorageDisk::CreateNewsGroup(const std::string& title)
         {
             m_Out << "NewsGroup" << std::endl;
             m_Out << "{" << std::endl;
-            m_Out << "id " << rand() % 200 << std::endl;
+            m_Out << "id " << rand() % 100000 << std::endl;
             m_Out << "title " << title << std::endl;
             m_Out << "}" << std::endl << std::endl;
             m_Out.close();
@@ -44,8 +50,6 @@ std::vector<std::shared_ptr<NewsGroup>> StorageDisk::ListNewsGroups()
         std::string line;
         while(std::getline(m_In, line))
         {
-            std::cout << "line" << std::endl;
-            std::cout << line << std::endl;
             if(readingNewsgroup)
             {
                 std::istringstream iss(line);
@@ -193,11 +197,7 @@ bool StorageDisk::DeleteNewsGroup(int id)
             rename("test.database2", "test.database");
         }
     }
-    bool t = true;
-    while(t) 
-    {
-        t = DeleteArticle(id);
-    }
+    while(DeleteArticlesInNewsgroup(id)){}
     return true;
 }
 
@@ -211,7 +211,7 @@ bool StorageDisk::CreateArticle(int newsgroup_id, const std::string& title,const
             m_Out << "Article" << std::endl;
             m_Out << "{" << std::endl;
             m_Out << "newsgroup_id " << newsgroup_id << std::endl;
-            m_Out << "id " << rand() % 200 << std::endl;
+            m_Out << "id " << rand() % 100000 << std::endl;
             m_Out << "title " << title << std::endl;
             m_Out << "author " << author << std::endl;
             m_Out << "text \n" << text << std::endl;
@@ -265,13 +265,14 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
                     author = line.substr(7);
                 }
 
-                if(line == "}" || line == "} " || word == "}\n" || word == "}")
+                if(ngid == newsgroup_id && (line == "}" || line == "} " || word == "}\n" || word == "}"))
                 {
                     readingText = false;
                     readingArticle = false;
                     text.erase(text.end()-1);
                     articles.push_back(std::make_shared<Article>(newsgroup_id, aid, title, author, text));
                     text = "";
+                    ngid = -1;
                 }
 
                 if(readingText && readingArticle && !(line == "}" || line == "} " || word == "}\n" || word == "}"))
@@ -296,7 +297,7 @@ std::vector<std::shared_ptr<Article>> StorageDisk::GetArticles(int newsgroup_id)
     return articles;
 }
 
-bool StorageDisk::DeleteArticle(int id)
+bool StorageDisk::DeleteArticlesInNewsgroup(int newsgroupd_id)
 { 
     bool found = false;
     m_In.open("test.database");
@@ -319,7 +320,7 @@ bool StorageDisk::DeleteArticle(int id)
             {
                 iss >> word;
                 ngid = std::stoi(word);
-                if(ngid==id)
+                if(ngid==newsgroupd_id)
                 {
                     found = true;
                     startIndex = lineIndex;

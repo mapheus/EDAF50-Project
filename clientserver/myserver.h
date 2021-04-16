@@ -32,7 +32,7 @@ public:
     void inputHandler(int choice);
 
 private:
-    ArticleInfo GetArticleAndSendInfo();
+    ArticleInfo GetArticleAndSendInfo(Protocol prot);
 
 private:
     std::unique_ptr<Storage> storage;

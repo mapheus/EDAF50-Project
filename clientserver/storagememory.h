@@ -6,6 +6,7 @@
 class StorageMemory : public Storage
 {
 public:
+    StorageMemory();
     virtual bool CreateNewsGroup(const std::string& title) override;
     virtual std::vector<std::shared_ptr<NewsGroup>> ListNewsGroups() override;
     virtual std::shared_ptr<NewsGroup> GetNewsGroup(int id) override;

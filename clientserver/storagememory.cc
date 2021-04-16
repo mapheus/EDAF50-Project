@@ -1,5 +1,13 @@
 #include "storagememory.h"
 
+#include <stdlib.h>
+#include <time.h>  
+
+StorageMemory::StorageMemory()
+{
+    srand(time(NULL));
+}
+
 bool StorageMemory::CreateNewsGroup(const std::string& title)
 {
     auto it = find_if(m_NewsGroups.begin(), m_NewsGroups.end(), [&title](std::shared_ptr<NewsGroup>& ng) {
@@ -7,7 +15,7 @@ bool StorageMemory::CreateNewsGroup(const std::string& title)
     });
     if(it == m_NewsGroups.end())
     {
-        m_NewsGroups.emplace_back(std::make_shared<NewsGroup>(title));
+        m_NewsGroups.emplace_back(std::make_shared<NewsGroup>(title, rand()%100000));
         return true;
     }
     else
@@ -55,7 +63,7 @@ bool StorageMemory::CreateArticle(int newsgroup_id, const std::string& title,con
     std::shared_ptr<NewsGroup> ng = GetNewsGroup(newsgroup_id);
     if(ng != nullptr)
     {
-        ng->addArticle(std::make_shared<Article>(newsgroup_id, title, author, text));
+        ng->addArticle(std::make_shared<Article>(newsgroup_id, rand()%100000, title, author, text));
         return true;
     }
     else 

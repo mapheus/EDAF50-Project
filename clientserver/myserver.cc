@@ -3,7 +3,7 @@
 #include "storagememory.h"
 #include "storagedisk.h"
 
-#define MEMORY
+//#define MEMORY
 
 MyServer::MyServer(int argc, char* argv[])
 {
@@ -36,7 +36,7 @@ MyServer::MyServer(int argc, char* argv[])
 }
 
 // Helper functions
-ArticleInfo MyServer::GetArticleAndSendInfo()
+ArticleInfo MyServer::GetArticleAndSendInfo(Protocol prot)
 {
         int groupID = mh.recvIntParameter();
         int articleID = mh.recvIntParameter();
@@ -46,7 +46,7 @@ ArticleInfo MyServer::GetArticleAndSendInfo()
         info.groupID = groupID;
         info.articleID = articleID;
 
-        mh.sendCode(static_cast<int>(Protocol::ANS_GET_ART));
+        mh.sendCode(static_cast<int>(prot));
         if(end != static_cast<int>(Protocol::COM_END)) {throw new ConnectionClosedException;}
         std::shared_ptr<NewsGroup> ng = storage->GetNewsGroup(groupID);
         if(ng == nullptr) 
@@ -98,9 +98,11 @@ void MyServer::inputHandler(int choice)
                 {
                         std::string groupName = mh.recvStringParameter();
                         int end = mh.recvCode();
-                        if(end != static_cast<int>(Protocol::COM_END)) {
-                                std::cout << "connectipondlcosed" << std::endl;
-                                throw new ConnectionClosedException;}
+                        if(end != static_cast<int>(Protocol::COM_END)) 
+                        {
+                                std::cout << "Connection Closed" << std::endl;
+                                throw new ConnectionClosedException;
+                        }
 
                         bool created = storage->CreateNewsGroup(groupName);
                         mh.sendCode(static_cast<int>(Protocol::ANS_CREATE_NG));
@@ -184,7 +186,7 @@ void MyServer::inputHandler(int choice)
                 }
                 case static_cast<int>(Protocol::COM_DELETE_ART):
                 {       
-                        ArticleInfo info = GetArticleAndSendInfo();
+                        ArticleInfo info = GetArticleAndSendInfo(Protocol::ANS_DELETE_ART);
                         if(info.success)
                         {
                                 storage->DeleteArticle(info.groupID, info.articleID);
@@ -195,7 +197,7 @@ void MyServer::inputHandler(int choice)
                 }
                 case static_cast<int>(Protocol::COM_GET_ART):
                 {
-                        ArticleInfo info = GetArticleAndSendInfo();
+                        ArticleInfo info = GetArticleAndSendInfo(Protocol::ANS_GET_ART);
                         if(info.success)
                         {
                                 mh.sendStringParameter(info.article->getTitle());
@@ -226,7 +228,6 @@ void MyServer::run() {
                 {
                         try {
                                 int nbr = mh.recvCode();
-                                std::cout << "number: " << nbr << std::endl;
                                 inputHandler(nbr);
                         } catch (ConnectionClosedException&) {
                                 server->deregisterConnection(conn);

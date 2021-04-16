@@ -9,12 +9,6 @@
 #include "article.h"
 #include "../protocol.h"
 
-
-enum class StorageType
-{
-    Memory, Disk
-};
-
 class Storage {
 public:
     virtual bool CreateNewsGroup(const std::string& title) = 0;
@@ -24,8 +18,6 @@ public:
     virtual bool DeleteArticle(int groupID, int id) = 0;
 
     virtual bool CreateArticle(int newsgroup_id, const std::string& title,const std::string& author,const std::string& text ) = 0;
-private:
-
 };
 
 #endif
