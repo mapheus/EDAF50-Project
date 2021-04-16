@@ -197,7 +197,11 @@ bool StorageDisk::DeleteNewsGroup(int id)
             rename("test.database2", "test.database");
         }
     }
-    while(DeleteArticlesInNewsgroup(id)){}
+    bool t = true;
+    while(t) 
+    {
+        t = DeleteArticlesInNewsgroup(id);
+    }
     return true;
 }
 
@@ -335,6 +339,7 @@ bool StorageDisk::DeleteArticlesInNewsgroup(int newsgroupd_id)
             
             ++lineIndex;
         }
+        m_In.close();
         if(found) 
         {
             // Read file again and only add rows that does not include id to remove
