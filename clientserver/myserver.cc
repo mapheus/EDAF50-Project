@@ -3,6 +3,7 @@
 #include "storagememory.h"
 #include "storagedisk.h"
 
+#include <iostream>
 //#define MEMORY
 
 MyServer::MyServer(int argc, char* argv[])
@@ -31,29 +32,19 @@ MyServer::MyServer(int argc, char* argv[])
         std::cout << "---------------------" << std::endl;
         std::cout << "1: Use Memory Database" << std::endl;
         std::cout << "2: Use Disk Database" << std::endl;
-        int nbr;
-        bool num = true;
+        int nbr = 0;
         std::cin >> nbr;
         std::cin.ignore();
 
-        while(true) 
-        {
-                if(std::cin.fail()) 
-                {
-                        num = false;
-                        std::cin.clear();
-                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-                } else {
-                        break;
-                }
-        }
-        switch(num)
+        switch(nbr)
         {
                 case 1:
                         storage = std::make_unique<StorageMemory>();
+                        std::cout << "Server is running with memory database..." << std::endl;
                         break;
                 case 2:
                         storage = std::make_unique<StorageDisk>();
+                        std::cout << "Server is running with disk database..." << std::endl;
                         break;
                 default:
                         std::cout << "Wrong input, defaulting to Memory." << std::endl;
