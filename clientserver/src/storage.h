@@ -7,7 +7,7 @@
 
 #include "newsgroup.h"
 #include "article.h"
-#include "../protocol.h"
+#include "./server/protocol.h"
 
 class Storage {
 public:

@@ -1,10 +1,10 @@
 #ifndef MY_SERVER
 #define MY_SERVER
 
-#include "connection.h"
-#include "connectionclosedexception.h"
-#include "server.h"
-#include "protocol.h"
+#include "./server/connection.h"
+#include "./server/connectionclosedexception.h"
+#include "./server/server.h"
+#include "./server/protocol.h"
 #include "messagehandler.h"
 #include "newsgroup.h"
 #include "storage.h"

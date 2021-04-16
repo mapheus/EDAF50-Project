@@ -8,9 +8,9 @@
 #include <memory>
 #include <string>
 
-#include "../connection.h"
-#include "../connectionclosedexception.h"
-#include "../protocolviolationexception.h"
+#include "./server/connection.h"
+#include "./server/connectionclosedexception.h"
+#include "./server/protocolviolationexception.h"
 
 using std::string;
 

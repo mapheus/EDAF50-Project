@@ -21,22 +21,31 @@ LDFLAGS   = -g -L..
 #LDFLAGS +=  -stdlib=libc++
 
 # Libraries
-LDLIBS = -lclientserver
+LDLIBS = libclientserver.a
+
+
+SRC_DIR := 
+BUILD_DIR := ../build/
+BUILD_TARGS := $(patsubst %,$(DEST_DIR)%,$(PROGS))
 
 # Targets
 PROGS = myserver myclient
 
-all: $(PROGS)
+all: libclientserver.a $(PROGS)
+
 
 # Targets rely on implicit rules for compiling and linking
 # The dependency on libclientserver.a is not defined.
-myserver: myserver.o messagehandler.o newsgroup.o storagememory.o storagedisk.o
-myclient: myclient.o messagehandler.o 
+myserver: $(SRC_DIR)myserver.o  $(SRC_DIR)messagehandler.o $(SRC_DIR)newsgroup.o $(SRC_DIR)storagememory.o $(SRC_DIR)storagedisk.o 
+myclient: $(SRC_DIR)myclient.o $(SRC_DIR)messagehandler.o
+libclientserver.a: $(SRC_DIR)server/connection.o $(SRC_DIR)server/server.o
+	ar rv $(SRC_DIR)libclientserver.a  $(SRC_DIR)server/connection.o $(SRC_DIR)server/server.o
+	ranlib $(SRC_DIR)libclientserver.a
 
-SRC = $(wildcard *.cc)
+SRC = $(wildcard $(SRC_DIR)*.cc)
 
 # Phony targets
-.PHONY: all clean distclean
+.PHONY: all clean distclean install
 
 # Standard clean
 clean:
@@ -44,8 +53,12 @@ clean:
 
 
 distclean: clean
+	-rm $(SRC_DIR)libclientserver.a
 	-rm $(SRC:.cc=.d)
 	-rm -r $(addsuffix .dSym,$(PROGS)) # for cleaning on Macs
+
+install:
+	cp -f $(PROGS) $(BUILD_DIR)
 
 
 
